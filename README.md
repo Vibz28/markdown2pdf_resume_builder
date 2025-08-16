@@ -5,7 +5,7 @@ A professional resume builder that converts Markdown files to beautifully format
 ## Features
 
 ✅ **Dynamic PDF Generation**: Convert Markdown resumes to professional PDFs  
-✅ **One-Page Mode**: Automatically compress content to fit a single page  
+✅ **Smart One-Page Mode**: Automatically compress content with dynamic font sizing based on content length  
 ✅ **Multi-Page Mode**: Full formatting with optimal spacing and readability  
 ✅ **Interactive PDFs**: Preserves hyperlinks for email, LinkedIn, and other URLs  
 ✅ **ATS-Friendly**: Optimized for resume parsing systems like Workday and Greenhouse  
@@ -187,10 +187,20 @@ The tool generates:
 - **Professional URLs**: Clean, working hyperlinks in the PDF
 
 ### Customization Options
-- **Dynamic Sizing**: Automatic font and margin adjustment for one-page format
+- **Dynamic Font Sizing**: Automatically adjusts font sizes based on content length for optimal one-page fitting
+- **Intelligent Spacing**: Reduces margins and spacing dynamically for one-page mode
+- **Content-Aware Scaling**: Analyzes resume content and scales typography accordingly (6.8pt - 8.5pt range for one-page)
 - **Flexible Output**: Choose between compressed and expanded layouts
 - **Custom Filenames**: Specify your preferred output names
 - **Multiple Formats**: Support for various resume sections and structures
+
+### Smart One-Page Algorithm
+The one-page mode uses an intelligent algorithm that:
+- Analyzes total content length (characters)
+- Calculates optimal font scaling (6.8pt for long resumes, 8.5pt for shorter ones)
+- Reduces margins from 0.75" to 0.3"
+- Minimizes spacing between sections and entries
+- Maintains readability while maximizing content density
 
 ## ATS and LLM Compatibility
 

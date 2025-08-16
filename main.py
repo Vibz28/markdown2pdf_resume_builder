@@ -33,21 +33,63 @@ class ResumeBuilder:
         self.one_page = one_page
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(exist_ok=True)
-        self.styles = self._create_styles()
+        self.content_length = 0
+        self.styles = None  # Will be created after content analysis
     
-    def _create_styles(self) -> Dict[str, ParagraphStyle]:
+    def _estimate_content_length(self, content: str) -> int:
+        """Estimate the total content length for dynamic sizing."""
+        # Count meaningful content (excluding markdown syntax)
+        text_content = re.sub(r'[#*\-\[\]()]', '', content)
+        text_content = re.sub(r'\s+', ' ', text_content)
+        return len(text_content.strip())
+    
+    def _get_dynamic_sizing(self, content_length: int) -> Dict[str, float]:
+        """Calculate dynamic font sizes based on content length."""
+        if not self.one_page:
+            return {
+                'base_size': 11,
+                'name_size': 20,
+                'section_size': 14,
+                'small_size': 9
+            }
+        
+        # Dynamic sizing for one-page based on content length
+        # Rough estimation: 2500 chars = comfortable, 3500+ = very tight
+        if content_length <= 2000:
+            scale = 1.0
+        elif content_length <= 2500:
+            scale = 0.95
+        elif content_length <= 3000:
+            scale = 0.9
+        elif content_length <= 3500:
+            scale = 0.85
+        else:
+            scale = 0.8
+        
+        return {
+            'base_size': 8.5 * scale,
+            'name_size': 14 * scale,
+            'section_size': 10 * scale,
+            'small_size': 7.5 * scale
+        }
+    
+    def _create_styles(self, content_length: int) -> Dict[str, ParagraphStyle]:
         """Create custom paragraph styles for the resume."""
         styles = getSampleStyleSheet()
         
-        # Adjust sizes based on one-page mode
-        base_size = 9 if self.one_page else 11
+        # Get dynamic sizing based on content length
+        sizing = self._get_dynamic_sizing(content_length)
+        base_size = sizing['base_size']
+        name_size = sizing['name_size']
+        section_size = sizing['section_size']
+        small_size = sizing['small_size']
         
         custom_styles = {
             'Name': ParagraphStyle(
                 'Name',
                 parent=styles['Heading1'],
-                fontSize=16 if self.one_page else 20,
-                spaceAfter=4 if self.one_page else 6,
+                fontSize=name_size,
+                spaceAfter=2 if self.one_page else 6,
                 alignment=TA_CENTER,
                 textColor=Color(0.1, 0.15, 0.2),
                 fontName='Helvetica-Bold'
@@ -56,7 +98,7 @@ class ResumeBuilder:
                 'Title',
                 parent=styles['Normal'],
                 fontSize=base_size,
-                spaceAfter=4 if self.one_page else 6,
+                spaceAfter=2 if self.one_page else 6,
                 alignment=TA_CENTER,
                 textColor=Color(0.2, 0.3, 0.4),
                 fontName='Helvetica-Bold'
@@ -64,25 +106,25 @@ class ResumeBuilder:
             'Contact': ParagraphStyle(
                 'Contact',
                 parent=styles['Normal'],
-                fontSize=base_size - 1,
-                spaceAfter=8 if self.one_page else 12,
+                fontSize=small_size,
+                spaceAfter=4 if self.one_page else 12,
                 alignment=TA_CENTER,
                 textColor=Color(0.3, 0.3, 0.3)
             ),
             'SectionHeader': ParagraphStyle(
                 'SectionHeader',
                 parent=styles['Heading2'],
-                fontSize=base_size + 2,
-                spaceAfter=4 if self.one_page else 6,
-                spaceBefore=8 if self.one_page else 12,
+                fontSize=section_size,
+                spaceAfter=2 if self.one_page else 6,
+                spaceBefore=4 if self.one_page else 12,
                 textColor=Color(0.1, 0.15, 0.2),
                 fontName='Helvetica-Bold'
             ),
             'JobTitle': ParagraphStyle(
                 'JobTitle',
                 parent=styles['Normal'],
-                fontSize=base_size,
-                spaceAfter=2,
+                fontSize=base_size - 0.5,
+                spaceAfter=1 if self.one_page else 2,
                 textColor=black,
                 fontName='Helvetica-Bold'
             ),
@@ -90,33 +132,35 @@ class ResumeBuilder:
                 'Company',
                 parent=styles['Normal'],
                 fontSize=base_size,
-                spaceAfter=2,
+                spaceAfter=1 if self.one_page else 2,
                 textColor=black,
                 fontName='Helvetica-Bold'
             ),
             'DateLocation': ParagraphStyle(
                 'DateLocation',
                 parent=styles['Normal'],
-                fontSize=base_size - 1,
-                spaceAfter=4 if self.one_page else 6,
+                fontSize=small_size,
+                spaceAfter=2 if self.one_page else 6,
                 textColor=Color(0.4, 0.4, 0.4),
                 fontName='Helvetica-Oblique'
             ),
             'Body': ParagraphStyle(
                 'Body',
                 parent=styles['Normal'],
-                fontSize=base_size,
-                spaceAfter=3 if self.one_page else 4,
+                fontSize=base_size - 0.5,
+                spaceAfter=1.5 if self.one_page else 4,
                 alignment=TA_JUSTIFY,
-                leftIndent=12,
-                bulletIndent=12
+                leftIndent=10 if self.one_page else 12,
+                bulletIndent=10 if self.one_page else 12,
+                leading=(base_size - 0.5) * 1.2
             ),
             'Skills': ParagraphStyle(
                 'Skills',
                 parent=styles['Normal'],
-                fontSize=base_size,
-                spaceAfter=4 if self.one_page else 6,
-                alignment=TA_JUSTIFY
+                fontSize=base_size - 0.5,
+                spaceAfter=2 if self.one_page else 6,
+                alignment=TA_JUSTIFY,
+                leading=(base_size - 0.5) * 1.2
             )
         }
         
@@ -171,13 +215,14 @@ class ResumeBuilder:
     
     def _clean_text(self, text: str) -> str:
         """Clean markdown formatting for ReportLab."""
-        # Remove markdown formatting but preserve structure
-        text = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', text)  # Bold
-        text = re.sub(r'\*(.*?)\*', r'<i>\1</i>', text)      # Italic (but not bold)
-        text = re.sub(r'`(.*?)`', r'<font name="Courier">\1</font>', text)  # Code
-        
-        # Handle links
+        # Handle links first to avoid interference
         text = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r'<link href="\2">\1</link>', text)
+        
+        # Remove markdown formatting but preserve structure
+        # Fix: Be more careful with bold text to avoid adding semicolons
+        text = re.sub(r'\*\*([^*]+)\*\*', r'<b>\1</b>', text)  # Bold
+        text = re.sub(r'\*([^*]+)\*', r'<i>\1</i>', text)      # Italic (single asterisk, not bold)
+        text = re.sub(r'`([^`]+)`', r'<font name="Courier">\1</font>', text)  # Code
         
         return text
     
@@ -202,7 +247,7 @@ class ResumeBuilder:
                         story.append(Paragraph(clean_line, self.styles['Contact']))
                 
                 # Add separator
-                story.append(Spacer(1, 8 if self.one_page else 12))
+                story.append(Spacer(1, 3 if self.one_page else 12))
             
             elif section['type'] == 'section':
                 # Section header
@@ -239,7 +284,7 @@ class ResumeBuilder:
                 if current_entry:
                     story.extend(self._format_entry(current_entry))
                 
-                story.append(Spacer(1, 6 if self.one_page else 10))
+                story.append(Spacer(1, 2 if self.one_page else 10))
         
         return story
     
@@ -265,7 +310,7 @@ class ResumeBuilder:
                     formatted.append(Paragraph(clean_content, self.styles['Skills']))
         
         if formatted:
-            formatted.append(Spacer(1, 4 if self.one_page else 6))
+            formatted.append(Spacer(1, 2 if self.one_page else 6))
         
         return [KeepTogether(formatted)]
     
@@ -279,6 +324,12 @@ class ResumeBuilder:
         with open(markdown_path, 'r', encoding='utf-8') as f:
             markdown_content = f.read()
         
+        # Estimate content length for dynamic sizing
+        self.content_length = self._estimate_content_length(markdown_content)
+        
+        # Create styles based on content analysis
+        self.styles = self._create_styles(self.content_length)
+        
         # Parse content
         sections = self._parse_markdown_content(markdown_content)
         
@@ -290,8 +341,8 @@ class ResumeBuilder:
         
         output_path = self.output_dir / output_filename
         
-        # Set up PDF document
-        margins = 0.4*inch if self.one_page else 0.75*inch
+        # Set up PDF document with more aggressive margins for one-page
+        margins = 0.3*inch if self.one_page else 0.75*inch
         doc = SimpleDocTemplate(
             str(output_path),
             pagesize=letter,
