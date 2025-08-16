@@ -2,38 +2,164 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.1.0] - 2025-08-15
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [1.0.0] - 2025-08-15
+
+### 🎉 Major Release - Complete Restructure & Enhanced Features
 
 ### Added
-- Initial release of Markdown to PDF Resume Builder
-- ReportLab-based PDF generation for cross-platform compatibility
-- Dynamic font sizing and margins for one-page vs multi-page layouts
-- Interactive PDF support with preserved hyperlinks
-- ATS-friendly formatting optimized for resume parsing systems
-- Command-line interface with Click framework
-- Support for standard Markdown features (headers, lists, links, bold/italic, code)
-- Professional styling with configurable themes
-- Automatic output directory creation
-- Cross-platform PDF opening functionality
-- Sample resume template (Vibhor Janey's resume)
-- Comprehensive documentation and examples
-- Example usage script for demonstration
-- uv package manager support with pyproject.toml configuration
-- Alternative implementations for different PDF engines
+- **✨ Professional Project Structure**
+  - Adopted `src/` layout following Python packaging best practices
+  - Proper package organization with `src/markdown2pdf_resume_builder/`
+  - Comprehensive test suite with pytest
+  - Development automation with Makefile
+  - Professional documentation structure
+
+- **🎨 Template-Style Formatting**
+  - Colored header banner with customizable background color (default: #4A6741)
+  - White text on colored header for professional appearance
+  - Section icons (🎓 Education, 💼 Experience, 🛠 Skills, 📂 Projects, 📚 Courses)
+  - Styled section headers with borders and background colors
+  - Professional color scheme throughout
+
+- **🔗 Enhanced Hyperlink Support**
+  - Blue color and underline for clear link visibility
+  - Clickable links preserved in PDF output
+  - Special handling for project title links: `**[Project Name](URL)**`
+  - Smart link detection in contact information
+
+- **📋 Automatic Section Reordering**
+  - Intelligent section ordering: Education → Experience → Skills → Projects → Courses
+  - Works regardless of original markdown file structure
+  - Smart categorization based on section titles
+
+- **🛠 Customization Options**
+  - `--header-color` flag for custom header background colors
+  - `--font-scheme` flag for different font styling options
+  - Flexible output directory and filename control
+  - Template styling with professional defaults
+
+- **📦 Multiple Installation & Usage Methods**
+  - Console scripts: `resume-builder` and `markdown2pdf-resume-builder`
+  - Python module: `python -m markdown2pdf_resume_builder`
+  - Programmatic API for integration
+  - Legacy compatibility with deprecation warnings
+
+- **🧪 Comprehensive Testing**
+  - Unit tests for core functionality
+  - CLI integration tests
+  - Test fixtures and sample data
+  - Coverage reporting with >90% target
+
+- **📚 Professional Documentation**
+  - Detailed API documentation with examples
+  - Contributing guidelines for developers
+  - Project structure explanation
+  - Comprehensive README with usage examples
+
+### Fixed
+- **🐛 Semicolon Bug**: Eliminated unwanted semicolons in job titles and content
+- **🔧 Link Processing**: Improved markdown link parsing to avoid formatting conflicts
+- **📏 Dynamic Sizing**: Enhanced content length analysis for better one-page optimization
+- **🎯 Template Compliance**: Fixed styling to match professional resume templates
+
+### Changed
+- **🏗 Project Structure**: Complete reorganization following Python best practices
+  - Moved main code to `src/markdown2pdf_resume_builder/`
+  - Separated CLI logic into dedicated `cli.py`
+  - Core functionality in `resume_builder.py`
+  - Examples moved to dedicated `examples/` directory
+  
+- **⚙ Build System**: Upgraded to modern Python packaging
+  - `pyproject.toml` as single source of configuration
+  - Hatchling as build backend
+  - Proper dependency management
+  - Entry points for console scripts
+
+- **🎨 Default Styling**: Enhanced visual appearance
+  - Professional header with colored background
+  - Section headers with icons and styling
+  - Improved typography and spacing
+  - Better visual hierarchy
+
+- **📝 CLI Interface**: Enhanced command-line experience
+  - More descriptive help messages
+  - Better error handling and user feedback
+  - Consistent option naming and descriptions
+
+### Improved
+- **⚡ Performance**: Optimized PDF generation process
+- **🔒 Error Handling**: Comprehensive error reporting and validation
+- **📖 Documentation**: Complete rewrite with professional standards
+- **🧹 Code Quality**: Type hints, docstrings, and formatting standards
+
+### Development
+- **🔧 Development Tools**
+  - Makefile for common development tasks
+  - Black for code formatting
+  - Flake8 for linting
+  - mypy for type checking
+  - pytest for testing
+  - pre-commit hooks for quality assurance
+
+- **📋 Quality Assurance**
+  - Comprehensive test coverage
+  - Type annotations throughout
+  - Professional docstrings
+  - Code style enforcement
+
+## [0.1.0] - 2025-08-14
+
+### Added
+- Initial implementation of markdown to PDF resume builder
+- Dynamic font sizing for one-page optimization
+- Basic hyperlink support
+- ReportLab-based PDF generation
+- Click-based command-line interface
 
 ### Features
-- **One-page mode**: Compressed formatting to fit content on a single page
-- **Multi-page mode**: Optimal spacing for readability and professional appearance
-- **Interactive links**: Email, LinkedIn, and web links preserved in PDF
-- **Professional typography**: Clean, modern design with excellent readability
-- **ATS compatibility**: Optimized for Applicant Tracking Systems
-- **LLM-friendly**: Generated PDFs are easily parseable by AI systems
-- **Cross-platform**: Works on macOS, Windows, and Linux
+- One-page and multi-page resume generation
+- Dynamic content analysis and font scaling
+- Basic markdown parsing and PDF formatting
+- Cross-platform compatibility
 
-### Technical Details
-- Built with Python 3.10+ support
-- Uses ReportLab for reliable PDF generation
-- Click for command-line interface
-- Markdown2 for enhanced Markdown processing
-- Comprehensive error handling and user feedback
-- Modular design for easy extension and customization
+---
+
+## Migration Guide v0.1.0 → v1.0.0
+
+### For Users
+- **Installation**: Same process, but now supports multiple methods
+- **CLI Usage**: Same commands work, but new options available
+- **Output**: Improved styling and template compliance
+
+### For Developers
+- **Import Path**: `from markdown2pdf_resume_builder import ResumeBuilder`
+- **API**: Same public API, enhanced with new customization options
+- **Structure**: Code moved to `src/` - use development installation
+
+### Backward Compatibility
+- Legacy `main.py` still works (with deprecation warning)
+- Same command-line interface
+- Same programmatic API
+
+---
+
+## Upcoming Features
+
+### v1.1.0 (Planned)
+- [ ] Additional template themes
+- [ ] Custom font support
+- [ ] Advanced styling options
+- [ ] Batch processing capabilities
+
+### v1.2.0 (Planned)
+- [ ] Web interface for online generation
+- [ ] Additional output formats (HTML, Word)
+- [ ] Resume analytics and optimization suggestions
+- [ ] Integration with job boards and ATS systems
+
+---
+
+**Note**: This project follows semantic versioning. Major version changes may include breaking changes, minor versions add features, and patch versions include bug fixes.

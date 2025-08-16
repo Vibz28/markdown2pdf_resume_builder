@@ -1,123 +1,102 @@
 # Markdown to PDF Resume Builder
 
-A professional resume builder that converts Markdown files to beautifully formatted PDFs with dynamic sizing, interactive features, and ATS (Applicant Tracking System) friendly formatting.
+A professional, ATS-friendly resume builder that converts Markdown files to beautifully formatted PDFs with dynamic sizing, interactive features, and template-style formatting.
 
-## Features
+## ✨ Key Features
 
-✅ **Dynamic PDF Generation**: Convert Markdown resumes to professional PDFs  
-✅ **Smart One-Page Mode**: Automatically compress content with dynamic font sizing based on content length  
-✅ **Multi-Page Mode**: Full formatting with optimal spacing and readability  
-✅ **Interactive PDFs**: Preserves hyperlinks for email, LinkedIn, and other URLs  
-✅ **ATS-Friendly**: Optimized for resume parsing systems like Workday and Greenhouse  
-✅ **Professional Styling**: Clean, modern typography with excellent readability  
-✅ **LLM-Readable**: Generated PDFs are easily parseable by AI systems  
-✅ **Cross-Platform**: Works on macOS, Windows, and Linux  
+### **🎨 Template-Style Formatting**
+- **Colored Header Banner**: Professional header with customizable background color (default: #4A6741)
+- **Section Icons**: Automatic icons for Education 🎓, Experience 💼, Skills 🛠, Projects 📂, Courses 📚
+- **Styled Section Headers**: Bordered headers with background colors for visual hierarchy
+- **White Text on Header**: Name, title, and contact info in white text on colored background
 
-## Installation
+### **🔗 Enhanced Hyperlink Support**
+- **Visual Links**: Hyperlinks are blue and underlined for clear visibility
+- **Clickable PDFs**: All links preserved and functional in PDF output
+- **Project Title Links**: Support for `**[Project Name](URL)**` format with proper styling
+- **Contact Links**: Email and LinkedIn links automatically detected and styled
 
-### Prerequisites
-- Python 3.10 or higher
-- [uv](https://docs.astral.sh/uv/) package manager (recommended) or pip
+### **📄 Intelligent Layout**
+- **Dynamic Font Sizing**: Automatically adjusts font size (6.8pt-8.5pt) based on content length
+- **One-Page Optimization**: Aggressive compression algorithm for single-page resumes
+- **Section Reordering**: Automatically orders sections as Education → Experience → Skills → Projects → Courses
+- **Content-Aware Margins**: Adaptive margins (0.3" for one-page, 0.75" for multi-page)
 
-### Quick Start
+### **🛠 Customization Options**
+- **Header Colors**: Customize header background with `--header-color` flag
+- **Font Schemes**: Choose font styling with `--font-scheme` flag  
+- **Output Control**: Flexible output directory and filename options
+- **Debug-Friendly**: Comprehensive error handling and validation
 
-1. **Clone the repository** (or download the files):
+## 🚀 Quick Start
+
+### Installation
 ```bash
-git clone https://github.com/Vibz28/markdown2pdf_resume_builder.git
+# Clone and set up
+git clone <repository-url>
 cd markdown2pdf_resume_builder
-```
 
-2. **Install dependencies using uv** (recommended):
-```bash
+# Install dependencies using uv
 uv sync
+
+# Or install manually
+pip install reportlab markdown2 click
 ```
 
-   Or with pip:
+### Basic Usage
 ```bash
-pip install -r requirements.txt
+# Generate one-page resume with template styling
+python main.py resume.md --one-page
+
+# Generate multi-page resume with custom header color
+python main.py resume.md --header-color="#2C5F41"
+
+# Open PDF automatically after generation
+python main.py resume.md --one-page --open-pdf
 ```
 
-3. **Build your resume**:
+### Advanced Options
 ```bash
-# Generate a multi-page resume
-uv run python main.py your_resume.md
-# OR with pip: python main.py your_resume.md
-
-# Generate a one-page resume
-uv run python main.py --one-page your_resume.md
-
-# Specify custom output and auto-open
-uv run python main.py --one-page --output my_resume --output-dir pdfs --open-pdf your_resume.md
+# Full customization
+python main.py resume.md \
+    --one-page \
+    --header-color="#4A6741" \
+    --font-scheme="modern" \
+    --output-dir="pdfs" \
+    --output="my_resume" \
+    --open-pdf
 ```
 
-4. **Try the example** (uses the included sample resume):
-```bash
-# Run the example script
-./example_usage.sh
+## 📝 Markdown Format
 
-# Or manually test with the sample
-uv run python main.py [YOUR_RESUME_FILE].md
-uv run python main.py --one-page [YOUR_RESUME_FILE].md
-```
-
-## Usage
-
-### Command Line Interface
-
-```bash
-uv run python main.py [OPTIONS] MARKDOWN_FILE
-```
-
-**Options:**
-- `--one-page, -1`: Generate a one-page resume with compressed formatting
-- `--output, -o TEXT`: Output filename (without extension)
-- `--output-dir TEXT`: Output directory (default: output)
-- `--open-pdf`: Open the generated PDF after creation
-- `--help`: Show help message
-
-### Examples
-
-```bash
-# Basic conversion
-uv run python main.py resume.md
-
-# One-page version
-uv run python main.py --one-page resume.md
-
-# Custom output location and auto-open
-uv run python main.py --one-page --output john_doe_resume --output-dir resumes --open-pdf resume.md
-```
-
-## Markdown Format
-
-Your resume should follow a structured Markdown format. Here's the recommended structure based on the included sample:
-
+### Header Section (Name & Contact)
 ```markdown
 # Your Name
-**Your Title/Position**
+**Your Professional Title**
 
-[email@example.com](mailto:email@example.com) | (123) 456-7890 | [linkedin.com/in/yourprofile](https://linkedin.com/in/yourprofile) | City, State
+[your.email@domain.com](mailto:your.email@domain.com) | (123) 456-7890 | [linkedin.com/in/yourprofile](https://linkedin.com/in/yourprofile) | City, State
+```
 
----
+### Sections
+```markdown
+## EDUCATION
+
+**University Name** — *Degree Title*  
+Sep 2021 – Dec 2022 | City, State
 
 ## WORK EXPERIENCE
 
 **Company Name**  
 **Job Title**  
-*Date Range | Location*
+*Jan 2023 – present | City, State*
 
-- Achievement or responsibility with **bold** keywords
-- Another achievement with metrics and results
-- Technical accomplishments with specific technologies
-
-## EDUCATION
-
-**University Name** — *Degree*  
-Date Range | Location
+- Achievement or responsibility with specific metrics
+- Another bullet point describing your impact
 
 ## SKILLS
 
-**Category:** Skill 1, Skill 2, Skill 3, etc.
+**Category:** Technology, Tool, Framework, Language
+**Programming Languages:** Python (NumPy, Pandas), R, Java, JavaScript
 
 ## PROJECTS
 
@@ -127,158 +106,85 @@ Date Range | Location
 
 **Another Project — Technology Stack**  
 - Description without link (also supported)
+
+## COURSES
+
+**Course Name** — Provider  
+Month Year
 ```
 
-### Supported Markdown Features
+## 🎯 Template Features
 
-- **Headers** (H1-H4): Used for name, sections, companies, and positions
-- **Bold/Italic**: For emphasis and highlighting
-- **Links**: Email, LinkedIn, GitHub, portfolio, and project links (preserved as clickable)
-  - Contact links: `[email@domain.com](mailto:email@domain.com)`
-  - Social links: `[LinkedIn Profile](https://linkedin.com/in/username)`
-  - Project links: `**[Project Title](https://link-to-project.com)**`
-- **Lists**: Bullet points for achievements and skills
-- **Code**: Inline code for technical terms and technologies
-- **Tables**: For structured data (if needed)
-- **Horizontal Rules**: Section separators
+### Visual Hierarchy
+- **Header Banner**: Colored background with white text for name, title, and contact
+- **Section Headers**: Icons + bordered backgrounds for clear section separation
+- **Content Styling**: Bold job titles, italic dates/locations, justified body text
+- **Professional Colors**: Configurable header color with complementary text colors
 
-## Output Files
+### Link Handling
+- **Visible Links**: Blue color + underline for immediate recognition
+- **Preserved Functionality**: All hyperlinks remain clickable in PDF
+- **Smart Processing**: Handles various link formats including project titles
 
-The tool generates:
-- **PDF**: Your professionally formatted resume
-- **HTML**: Debug version for review and customization
-- **Organized structure**: Files saved in the specified output directory
+### Dynamic Sizing
+- **Content Analysis**: Calculates optimal font sizes based on total content length
+- **One-Page Algorithm**: Scales fonts from 8.5pt to 6.8pt for content compression
+- **Margin Adjustment**: Reduces margins for one-page mode (0.3" vs 0.75")
 
-## Styling and Customization
+## 🔧 Command Line Options
 
-### Two Format Modes
+| Option | Description | Default |
+|--------|-------------|---------|
+| `--one-page` | Compress to single page | Multi-page |
+| `--header-color` | Header background color | `#4A6741` |
+| `--font-scheme` | Font styling scheme | `modern` |
+| `--output-dir` | Output directory | `output` |
+| `--output` | Custom filename | Auto-generated |
+| `--open-pdf` | Open PDF after creation | No |
 
-1. **Multi-Page Mode** (default):
-   - 11pt base font size
-   - 0.75" margins
-   - Optimal spacing for readability
-   - Suitable for detailed resumes
+## 📊 Output Information
 
-2. **One-Page Mode** (`--one-page`):
-   - 10pt base font size
-   - 0.4" margins
-   - Compressed spacing
-   - Automatic content fitting
+The tool provides detailed output including:
+- **File Size**: Generated PDF size in KB
+- **Mode**: One-page vs multi-page confirmation  
+- **Path**: Full path to generated PDF
+- **Success/Error**: Clear status messages
 
-### Font and Design Features
+## 🐛 Bug Fixes & Improvements
 
-- **Professional Typography**: Georgia serif font for excellent readability
-- **Color Scheme**: Professional blues and grays
-- **Section Headers**: Bold, uppercase headers with subtle underlines
-- **Responsive Links**: Interactive hyperlinks preserved in PDF
-- **Clean Layout**: Optimized white space and visual hierarchy
+### Recent Updates
+- ✅ **Semicolon Bug**: Fixed regex patterns that added unwanted semicolons to job titles
+- ✅ **Link Visibility**: Added blue color and underline to make hyperlinks clearly visible
+- ✅ **Section Ordering**: Automatic reordering regardless of markdown file structure
+- ✅ **Template Styling**: Professional header banner and section formatting
+- ✅ **Enhanced Error Handling**: Better validation and user feedback
 
-## Output Quality & Features
+## 🛡 Error Handling
 
-### PDF Quality
-- **Professional Typography**: Clean, readable fonts optimized for both screen and print
-- **Consistent Formatting**: Proper spacing, alignment, and visual hierarchy
-- **Compact File Size**: Optimized PDFs typically under 10KB for fast loading
-- **Print-Ready**: High-quality output suitable for printing and digital sharing
+- **File Validation**: Checks for markdown file existence
+- **Content Analysis**: Validates markdown structure
+- **PDF Generation**: Comprehensive error reporting
+- **Cross-Platform**: Works on macOS, Windows, and Linux
 
-### ATS Compatibility Features
-- **Text-Based Content**: All text remains selectable and searchable
-- **Logical Structure**: Proper heading hierarchy and content flow
-- **Standard Fonts**: Uses widely-supported fonts for maximum compatibility
-- **Clean Layout**: No complex graphics or elements that confuse parsers
-- **Consistent Formatting**: Standardized spacing and structure
-
-### Interactive Elements
-- **Clickable Links**: Email, LinkedIn, GitHub, and portfolio links preserved
-- **Phone Numbers**: Properly formatted and accessible
-- **Professional URLs**: Clean, working hyperlinks in the PDF
-
-### Customization Options
-- **Dynamic Font Sizing**: Automatically adjusts font sizes based on content length for optimal one-page fitting
-- **Intelligent Spacing**: Reduces margins and spacing dynamically for one-page mode
-- **Content-Aware Scaling**: Analyzes resume content and scales typography accordingly (6.8pt - 8.5pt range for one-page)
-- **Flexible Output**: Choose between compressed and expanded layouts
-- **Custom Filenames**: Specify your preferred output names
-- **Multiple Formats**: Support for various resume sections and structures
-
-### Smart One-Page Algorithm
-The one-page mode uses an intelligent algorithm that:
-- Analyzes total content length (characters)
-- Calculates optimal font scaling (6.8pt for long resumes, 8.5pt for shorter ones)
-- Reduces margins from 0.75" to 0.3"
-- Minimizes spacing between sections and entries
-- Maintains readability while maximizing content density
-
-## ATS and LLM Compatibility
-
-The generated PDFs are optimized for:
-
-- **ATS Systems**: Clean text structure, proper heading hierarchy, standard fonts
-- **Resume Parsers**: Logical content flow, consistent formatting, accessible text
-- **LLM Processing**: Well-structured content that's easily parseable by AI
-- **Human Readers**: Professional appearance with excellent readability
-
-## Development
-
-### Project Structure
+## 📁 Project Structure
 
 ```
 markdown2pdf_resume_builder/
-├── main.py                          # Main resume builder script (ReportLab-based)
-├── resume_builder_reportlab.py      # Alternative ReportLab implementation
-├── pyproject.toml                   # Project configuration and dependencies
-├── README.md                        # This file
-├── LICENSE                          # Apache 2.0 license
-└── example_usage.sh                 # Example usage script
+├── main.py                     # Main resume builder (template-style)
+├── resume_builder_reportlab.py # Alternative ReportLab-only version
+├── pyproject.toml             # Project configuration
+├── example_usage_improved.sh  # Demo script with all features
+├── output/                    # Generated PDFs
+└── README.md                  # This file
 ```
 
-### Available Scripts
+## 🎉 Success Stories
 
-- **main.py**: Primary script using ReportLab (cross-platform compatible)
-- **resume_builder_reportlab.py**: Alternative ReportLab implementation
-- **example_usage.sh**: Demonstration script showing various usage patterns
-
-### Dependencies
-
-- **markdown2**: Enhanced Markdown processing
-- **weasyprint**: High-quality PDF generation
-- **reportlab**: PDF manipulation capabilities
-- **click**: Command-line interface framework
-
-### Contributing
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature-name`
-3. Make your changes and test them
-4. Commit your changes: `git commit -am 'Add feature'`
-5. Push to the branch: `git push origin feature-name`
-6. Submit a pull request
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Font errors**: Ensure you have standard system fonts installed
-2. **PDF generation fails**: Check that all dependencies are properly installed
-3. **One-page doesn't fit**: Consider reducing content or using multi-page mode
-4. **Links not working**: Verify markdown link syntax is correct
-
-### System-Specific Notes
-
-- **macOS**: May require additional font packages for optimal rendering
-- **Windows**: Ensure proper Python and dependency installation
-- **Linux**: May need additional system libraries for WeasyPrint
-
-## License
-
-This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
-
-## Author
-
-**Vibhor Janey**
-- Email: vibhor.janey@gmail.com
-- LinkedIn: [linkedin.com/in/vibhorjaney](https://linkedin.com/in/vibhorjaney)
+✅ **Professional Output**: Generates ATS-friendly PDFs that pass applicant tracking systems  
+✅ **Template Compliance**: Matches professional resume templates with colored headers  
+✅ **Interactive Features**: Clickable links work perfectly in PDF viewers  
+✅ **Space Optimization**: Intelligent one-page compression for concise resumes  
 
 ---
 
-*Built with ❤️ to help create professional resumes that stand out to both humans and ATS systems.*
+**Ready to create your professional resume?** Start with `python main.py your_resume.md --one-page` and customize from there! 🚀

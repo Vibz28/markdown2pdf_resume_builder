@@ -1,6 +1,6 @@
 [project]
 name = "markdown2pdf-resume-builder"
-version = "0.1.0"
+version = "1.0.0"
 description = "A professional resume builder that converts Markdown to beautifully formatted PDFs with dynamic sizing and ATS-friendly formatting"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -8,9 +8,9 @@ authors = [
     { name = "Vibhor Janey", email = "vibhor.janey@gmail.com" }
 ]
 license = { text = "Apache-2.0" }
-keywords = ["resume", "pdf", "markdown", "cv", "ats-friendly"]
+keywords = ["resume", "pdf", "markdown", "cv", "ats-friendly", "template", "professional"]
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: End Users/Desktop",
     "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: 3",
@@ -24,21 +24,26 @@ classifiers = [
 dependencies = [
     "markdown2>=2.5.0",
     "reportlab>=4.0.0",
-    "weasyprint>=66.0",
     "click>=8.0.0",
 ]
 
 [project.optional-dependencies]
 dev = [
     "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
     "black>=22.0.0",
     "flake8>=5.0.0",
     "mypy>=1.0.0",
+    "pre-commit>=3.0.0",
+]
+docs = [
+    "mkdocs>=1.5.0",
+    "mkdocs-material>=9.0.0",
 ]
 
 [project.scripts]
-markdown2pdf-resume-builder = "main:main"
-resume-builder = "main:main"
+markdown2pdf-resume-builder = "markdown2pdf_resume_builder.cli:main"
+resume-builder = "markdown2pdf_resume_builder.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/Vibz28/markdown2pdf_resume_builder"
@@ -50,23 +55,88 @@ Issues = "https://github.com/Vibz28/markdown2pdf_resume_builder/issues"
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+# Tool configurations
+[tool.hatch.build.targets.wheel]
+packages = ["src/markdown2pdf_resume_builder"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "src/",
+    "tests/",
+    "docs/",
+    "examples/",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md",
+]
+
 [tool.black]
 line-length = 100
 target-version = ['py310']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
 
 [tool.mypy]
 python_version = "3.10"
 warn_return_any = true
 warn_unused_configs = true
-disallow_untyped_defs = truet]
-name = "markdown2pdf-resume-builder"
-version = "0.1.0"
-description = "Add your description here"
-readme = "README.md"
-requires-python = ">=3.10"
-dependencies = [
-    "click>=8.2.1",
-    "markdown2>=2.5.4",
-    "reportlab>=4.4.3",
-    "weasyprint>=66.0",
+disallow_untyped_defs = true
+check_untyped_defs = true
+strict_equality = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+
+[[tool.mypy.overrides]]
+module = [
+    "reportlab.*",
+    "markdown2.*",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "--cov=src/markdown2pdf_resume_builder",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+]
+
+[tool.coverage.run]
+source = ["src"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
 ]
