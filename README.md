@@ -56,8 +56,8 @@ uv run python main.py --one-page --output my_resume --output-dir pdfs --open-pdf
 ./example_usage.sh
 
 # Or manually test with the sample
-uv run python main.py resume_vibhor_janey_updated_aug_2025.md
-uv run python main.py --one-page resume_vibhor_janey_updated_aug_2025.md
+uv run python main.py [YOUR_RESUME_FILE].md
+uv run python main.py --one-page [YOUR_RESUME_FILE].md
 ```
 
 ## Usage
@@ -212,11 +212,7 @@ markdown2pdf_resume_builder/
 ├── pyproject.toml                   # Project configuration and dependencies
 ├── README.md                        # This file
 ├── LICENSE                          # Apache 2.0 license
-├── example_usage.sh                 # Example usage script
-├── resume_vibhor_janey_updated_aug_2025.md  # Sample resume
-└── output/                          # Generated PDFs and HTML files
-    ├── *.pdf                        # Generated PDF files
-    └── *.html                       # Debug HTML files (WeasyPrint only)
+└── example_usage.sh                 # Example usage script
 ```
 
 ### Available Scripts
@@ -240,16 +236,6 @@ markdown2pdf_resume_builder/
 4. Commit your changes: `git commit -am 'Add feature'`
 5. Push to the branch: `git push origin feature-name`
 6. Submit a pull request
-
-## Sample Resume
-
-Check out `resume_vibhor_janey_updated_aug_2025.md` for a complete example of how to structure your resume markdown file. This sample demonstrates:
-
-- Professional formatting for work experience
-- Skills categorization
-- Education and project sections
-- Proper use of bold text for keywords
-- Interactive contact information
 
 ## Troubleshooting
 
