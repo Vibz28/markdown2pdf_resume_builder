@@ -412,8 +412,36 @@ class ResumeBuilder:
                 if 'skill' in section['title'].lower():
                     story.extend(self._format_skills_section(section['content']))
                 elif 'education' in section['title'].lower():
-                    # Special handling for education section - horizontal layout
-                    story.extend(self._format_education_section(section['content']))
+                    # Special handling for education section - horizontal layout only for one-page
+                    if self.one_page:
+                        story.extend(self._format_education_section(section['content']))
+                    else:
+                        # Use normal entry formatting for multi-page resumes
+                        current_entry = []
+                        
+                        for line in section['content']:
+                            stripped_line = line.strip()
+                            if not stripped_line:
+                                continue
+                                
+                            if stripped_line.startswith('**'):
+                                # Institution name with degree - this is a new entry
+                                if current_entry:
+                                    story.extend(self._format_entry(current_entry))
+                                    current_entry = []
+                                
+                                # Clean the institution and degree line properly
+                                clean_institution_line = self._clean_text(line)
+                                current_entry.append(('company', clean_institution_line))
+                            
+                            elif stripped_line and not stripped_line.startswith('#'):
+                                # Date and location info
+                                clean_line = self._clean_text(line)
+                                current_entry.append(('date_location', clean_line))
+                        
+                        # Add the last entry
+                        if current_entry:
+                            story.extend(self._format_entry(current_entry))
                 else:
                     # Process section content normally
                     current_entry = []
@@ -487,16 +515,20 @@ class ResumeBuilder:
         education_entries = []
         current_entry = []
         
-        # Parse education entries
-        for line in content:
-            clean_line = self._clean_text(line)
-            if clean_line.startswith('**') and clean_line.endswith('**'):
+        # Parse education entries using raw lines to detect ** markers
+        for raw_line in content:
+            stripped = raw_line.strip()
+            if not stripped:
+                continue
+            clean_line = self._clean_text(raw_line).strip()
+            
+            if stripped.startswith('**'):
                 # Institution name with degree - this is a new entry
                 if current_entry:
                     education_entries.append(current_entry)
                     current_entry = []
                 current_entry.append(('institution_degree', clean_line))
-            elif clean_line and not clean_line.startswith('#') and not clean_line.startswith('**'):
+            elif clean_line and not clean_line.startswith('#'):
                 # Date and location info
                 current_entry.append(('date_location', clean_line))
         
@@ -504,8 +536,8 @@ class ResumeBuilder:
         if current_entry:
             education_entries.append(current_entry)
         
-        # Create side-by-side layout for education entries
-        if education_entries and len(education_entries) >= 2:
+        # Create side-by-side layout for education entries (only for one-page)
+        if self.one_page and education_entries and len(education_entries) >= 2:
             # Extract data for both entries
             left_institution_degree = ""
             left_date_location = ""
@@ -555,7 +587,7 @@ class ResumeBuilder:
             formatted.append(education_table)
             
         else:
-            # Fallback for single entry or more than two entries
+            # Fallback for multi-page or single entry - vertical layout
             for entry in education_entries:
                 for entry_type, content_item in entry:
                     if entry_type == 'institution_degree':
