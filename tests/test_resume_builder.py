@@ -93,10 +93,25 @@ class TestResumeBuilder:
         cleaned = builder._clean_text(text_with_bold)
         assert "<b>Bold Text</b>" in cleaned
         
-        # Test italic formatting
+        # Test italic formatting (asterisks)
         text_with_italic = "*Italic Text*"
         cleaned = builder._clean_text(text_with_italic)
         assert "<i>Italic Text</i>" in cleaned
+        
+        # Test italic formatting (underscores)
+        text_with_italic_underscore = "_Italic Text_"
+        cleaned = builder._clean_text(text_with_italic_underscore)
+        assert "<i>Italic Text</i>" in cleaned
+        
+        # Test bold+italic combination: _**text**_
+        text_bold_italic = "_**Senior Manager, AI Solution Architect**_"
+        cleaned = builder._clean_text(text_bold_italic)
+        assert "<b><i>Senior Manager, AI Solution Architect</i></b>" in cleaned
+        
+        # Test bold+italic combination: **_text_**
+        text_bold_italic_alt = "**_Senior Manager, AI Solution Architect_**"
+        cleaned = builder._clean_text(text_bold_italic_alt)
+        assert "<b><i>Senior Manager, AI Solution Architect</i></b>" in cleaned
     
     def test_reorder_sections(self, sample_markdown):
         """Test section reordering functionality."""
@@ -121,6 +136,28 @@ class TestResumeBuilder:
         
         if education_idx is not None and experience_idx is not None:
             assert education_idx < experience_idx
+    
+    def test_horizontal_rule_filtering(self):
+        """Test that horizontal rules are filtered out during parsing."""
+        builder = ResumeBuilder()
+        content = """# John Doe
+
+**Software Engineer**
+
+---
+
+## Experience
+
+**Company A**  
+*Software Engineer*"""
+        
+        sections = builder._parse_markdown_content(content)
+        
+        # Check that no section contains horizontal rules
+        for section in sections:
+            for line in section['content']:
+                assert not line.startswith('---')
+                assert line != '---'
     
     def test_generate_pdf(self, temp_markdown_file, tmp_path):
         """Test PDF generation."""

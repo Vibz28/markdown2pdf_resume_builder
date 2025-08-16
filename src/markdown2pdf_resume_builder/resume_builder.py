@@ -55,8 +55,8 @@ class ResumeBuilder:
                 'small_size': 9
             }
         
-        # Dynamic sizing for one-page based on content length
-        # Rough estimation: 2500 chars = comfortable, 3500+ = very tight
+        # More aggressive dynamic sizing for one-page based on content length
+        # Target: make it fit on one page regardless of content density
         if content_length <= 2000:
             scale = 1.0
         elif content_length <= 2500:
@@ -65,35 +65,59 @@ class ResumeBuilder:
             scale = 0.9
         elif content_length <= 3500:
             scale = 0.85
+        elif content_length <= 4000:
+            scale = 0.75
+        elif content_length <= 4500:
+            scale = 0.65
+        elif content_length <= 5000:
+            scale = 0.6
         else:
-            scale = 0.8
+            scale = 0.55  # Very dense content
         
         return {
-            'base_size': 8.5 * scale,
-            'name_size': 14 * scale,
-            'section_size': 10 * scale,
-            'small_size': 7.5 * scale
+            'base_size': 9.5 * scale,
+            'name_size': 16 * scale,
+            'section_size': 11 * scale,
+            'small_size': 8 * scale
         }
     
     def create_styles(self):
-        """Create paragraph styles based on content length."""
+        """Create paragraph styles based on content length and one-page settings."""
         base_styles = getSampleStyleSheet()
         
-        if self.content_length > 5000:
-            font_size = 9
-            title_size = 14
-            name_size = 18
-            spacing = 3
-        elif self.content_length > 3000:
-            font_size = 10
-            title_size = 16
-            name_size = 20
-            spacing = 4
+        # Use dynamic sizing for one-page resumes, standard sizing for multi-page
+        if self.one_page:
+            # Get dynamic sizing based on content length
+            sizing = self._get_dynamic_sizing(self.content_length)
+            font_size = sizing['base_size']
+            title_size = sizing['section_size']
+            name_size = sizing['name_size']
+            spacing = max(1, int(sizing['base_size'] * 0.2))  # Reduced spacing
         else:
-            font_size = 11
-            title_size = 18
-            name_size = 22
-            spacing = 6
+            # Standard multi-page sizing
+            if self.content_length > 5000:
+                font_size = 9
+                title_size = 12
+                name_size = 16
+                spacing = 2
+                # font_size = 9
+                # title_size = 14
+                # name_size = 18
+                # spacing = 3
+            elif self.content_length > 3000:
+                font_size = 9
+                title_size = 14
+                name_size = 18
+                spacing = 3
+                # font_size = 10
+                # title_size = 16
+                # name_size = 20
+                # spacing = 4
+            else:
+                font_size = 11
+                title_size = 18
+                name_size = 22
+                spacing = 6
 
         font_family = "Helvetica"
         if self.font_scheme == "serif":
@@ -109,17 +133,17 @@ class ResumeBuilder:
                 fontName=f'{font_family}-Bold',
                 textColor=self.header_text_color,
                 alignment=1,  # Center
-                spaceAfter=2,
+                spaceAfter=1,  # Reduced header spacing
                 spaceBefore=0,
             ),
             'Title': ParagraphStyle(
                 'Title',
                 parent=base_styles['Normal'],
-                fontSize=title_size-2,
-                fontName=font_family,
+                fontSize=title_size-1,  # Slightly smaller
+                fontName=f'{font_family}-Bold',
                 textColor=self.header_text_color,
                 alignment=1,  # Center
-                spaceAfter=spacing,
+                spaceAfter=2 if self.one_page else spacing,  # Reduced header spacing
                 spaceBefore=0,
             ),
             'Contact': ParagraphStyle(
@@ -129,13 +153,13 @@ class ResumeBuilder:
                 fontName=font_family,
                 textColor=self.header_text_color,
                 alignment=1,  # Center
-                spaceAfter=2,
+                spaceAfter=1 if self.one_page else 2,  # Reduced header spacing
                 spaceBefore=0,
             ),
             'SectionHeader': ParagraphStyle(
                 'SectionHeader',
                 parent=base_styles['Heading2'],
-                fontSize=font_size+3,
+                fontSize=font_size+2,  # Slightly larger than body
                 fontName=f'{font_family}-Bold',
                 textColor=black,
                 spaceAfter=spacing,
@@ -147,16 +171,16 @@ class ResumeBuilder:
             'JobTitle': ParagraphStyle(
                 'JobTitle',
                 parent=base_styles['Normal'],
-                fontSize=font_size+1,
+                fontSize=font_size-1,  # Smaller than company name
                 fontName=f'{font_family}-Oblique',  # Italicized
                 textColor=black,
                 spaceAfter=1,
-                spaceBefore=spacing-2,
+                spaceBefore=spacing-2 if spacing > 2 else 0,
             ),
             'Company': ParagraphStyle(
                 'Company',
                 parent=base_styles['Normal'],
-                fontSize=font_size,
+                fontSize=font_size,  # Base size for company
                 fontName=f'{font_family}-Bold',
                 textColor=black,
                 spaceAfter=1,
@@ -165,10 +189,10 @@ class ResumeBuilder:
             'DateLocation': ParagraphStyle(
                 'DateLocation',
                 parent=base_styles['Normal'],
-                fontSize=font_size-1,
+                fontSize=font_size-1.5,  # Smaller for dates
                 fontName=f'{font_family}-Oblique',
                 textColor=black,
-                spaceAfter=spacing-2,
+                spaceAfter=spacing-2 if spacing > 2 else 1,
                 spaceBefore=0,
             ),
             'Body': ParagraphStyle(
@@ -177,7 +201,7 @@ class ResumeBuilder:
                 fontSize=font_size,
                 fontName=font_family,
                 textColor=black,
-                spaceAfter=2,
+                spaceAfter=1 if self.one_page else 2,
                 spaceBefore=0,
                 leftIndent=12,
             ),
@@ -187,7 +211,7 @@ class ResumeBuilder:
                 fontSize=font_size,
                 fontName=font_family,
                 textColor=black,
-                spaceAfter=2,
+                spaceAfter=1 if self.one_page else 2,
                 spaceBefore=0,
             ),
         }
@@ -202,6 +226,10 @@ class ResumeBuilder:
         for line in lines:
             line = line.strip()
             if not line:
+                continue
+            
+            # Skip horizontal rules/separators
+            if line.startswith('---') or line == '---':
                 continue
                 
             # Header level 1 (Name)
@@ -244,10 +272,14 @@ class ResumeBuilder:
         # Handle links first to avoid interference - make them visually distinct
         text = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r'<link href="\2" color="blue"><u>\1</u></link>', text)
         
-        # Remove markdown formatting but preserve structure
-        # Fix: Be more careful with bold text to avoid adding semicolons
+        # Handle bold+italic combination first: _**text**_ or **_text_**
+        text = re.sub(r'_\*\*([^*]+)\*\*_', r'<b><i>\1</i></b>', text)  # _**text**_ -> bold+italic
+        text = re.sub(r'\*\*_([^_]+)_\*\*', r'<b><i>\1</i></b>', text)  # **_text_** -> bold+italic
+        
+        # Then handle remaining markdown formatting
         text = re.sub(r'\*\*([^*]+)\*\*', r'<b>\1</b>', text)  # Bold
-        text = re.sub(r'\*([^*]+)\*', r'<i>\1</i>', text)      # Italic (single asterisk, not bold)
+        text = re.sub(r'_([^_]+)_', r'<i>\1</i>', text)        # Italic (underscores)
+        text = re.sub(r'\*([^*]+)\*', r'<i>\1</i>', text)      # Italic (asterisks)
         text = re.sub(r'`([^`]+)`', r'<font name="Courier">\1</font>', text)  # Code
         
         return text
@@ -312,25 +344,25 @@ class ResumeBuilder:
         # Create table with appropriate width (not full margin width)
         table = Table(header_data, colWidths=[6.5*inch])
         
-        # Apply styling based on background color choice
+        # Apply styling based on background color choice with minimal padding
         if self.is_white_background:
             table.setStyle(TableStyle([
                 ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
                 ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                ('LEFTPADDING', (0, 0), (-1, -1), 12),
-                ('RIGHTPADDING', (0, 0), (-1, -1), 12),
-                ('TOPPADDING', (0, 0), (-1, -1), 6),
-                ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+                ('LEFTPADDING', (0, 0), (-1, -1), 6),   # Reduced padding
+                ('RIGHTPADDING', (0, 0), (-1, -1), 6),  # Reduced padding
+                ('TOPPADDING', (0, 0), (-1, -1), 2),    # Minimal top padding
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 4 if self.one_page else 8),  # Reduced bottom padding
             ]))
         else:
             table.setStyle(TableStyle([
                 ('BACKGROUND', (0, 0), (-1, -1), self.header_color),
                 ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
                 ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                ('LEFTPADDING', (0, 0), (-1, -1), 12),
-                ('RIGHTPADDING', (0, 0), (-1, -1), 12),
-                ('TOPPADDING', (0, 0), (-1, -1), 8),
-                ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+                ('LEFTPADDING', (0, 0), (-1, -1), 8),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 8),
+                ('TOPPADDING', (0, 0), (-1, -1), 6),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
             ]))
         
         return table
@@ -361,8 +393,8 @@ class ResumeBuilder:
                 header_table = self._create_header_table(name, title, contact_lines)
                 story.append(header_table)
                 
-                # Add separator
-                story.append(Spacer(1, 6 if self.one_page else 15))
+                # Add separator with minimal spacing for one-page
+                story.append(Spacer(1, 3 if self.one_page else 15))
             
             elif section['type'] == 'section':
                 # Clean section header without icons or boxes

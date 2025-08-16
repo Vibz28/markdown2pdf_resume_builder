@@ -5,6 +5,88 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.2] - 2025-08-15
+
+### 🚀 Critical One-Page Optimization & Layout Fixes
+
+### Fixed
+- **One-Page Functionality Restored**
+  - Fixed dynamic font sizing precision loss (removed integer conversion)
+  - Enhanced scaling algorithm with more aggressive size reduction for dense content
+  - Added additional content length thresholds (4000, 4500, 5000+ characters)
+  - Now properly fits content on single page regardless of density
+
+- **Header Space Optimization**
+  - Significantly reduced header padding and spacing for one-page resumes
+  - Minimized top/bottom padding in header table (2px top, 4px bottom for one-page)
+  - Reduced spacer after header from 6px to 3px for one-page layouts
+  - Eliminated excessive whitespace without compromising readability
+
+- **Typography Hierarchy Correction**
+  - **Job Titles:** Now smaller than company names (base_size - 1)
+  - **Company Names:** Proper base font size for prominence
+  - **Section Headers:** Appropriately sized (base_size + 2) with underlines
+  - Fixed size relationships for better visual hierarchy
+
+### Enhanced
+- **Dynamic Sizing Algorithm**
+  - More granular content length thresholds for better scaling
+  - Improved base font sizes starting from 9.5pt for better readability
+  - Enhanced scale factors: 65% for very dense content (5000+ chars)
+  - Maintains proportion across all text elements
+
+- **Space Efficiency**
+  - Reduced spacing between all elements in one-page mode
+  - Conditional spacing based on one-page flag throughout styles
+  - Optimized bullet point and paragraph spacing
+  - Minimized wasted vertical space while maintaining readability
+
+### Technical
+- **Precision Improvements**
+  - Removed integer conversion that was causing font size precision loss
+  - Enhanced floating-point calculations for accurate scaling
+  - Better proportional spacing calculations
+- **Layout Optimization**
+  - Conditional styling based on one-page mode
+  - Improved header table styling with minimal padding
+  - Enhanced vertical space management
+
+## [1.1.1] - 2025-08-15
+
+### 🐛 Critical Fixes & Improvements
+
+### Fixed
+- **Job Title Formatting**
+  - Fixed markdown parsing for combined bold+italic (`_**text**_`) job titles
+  - Job titles now render properly as both bold and italicized
+  - Removed underscore artifacts from final PDF output
+
+- **Section Separators**
+  - Completely removed horizontal rule separators (`---`) from PDF output
+  - Enhanced content parsing to filter out separator lines during processing
+  - Cleaner section transitions with typography-based hierarchy
+
+- **One-Page Dynamic Sizing**
+  - Fixed one-page resume formatting that was expanding to multiple pages
+  - Restored proper integration between content analysis and dynamic font sizing
+  - Enhanced scaling algorithm to ensure content fits on single page
+
+### Enhanced
+- **Markdown Processing**
+  - Improved regex patterns for handling complex markdown combinations
+  - Better precedence handling for nested formatting (bold+italic)
+  - Support for both `_**text**_` and `**_text_**` patterns
+
+- **Content Analysis**
+  - Enhanced content length estimation for more accurate dynamic sizing
+  - Improved font scaling algorithm for dense content
+  - Better proportion calculations for spacing and padding
+
+### Technical
+- Added comprehensive test coverage for new markdown parsing features
+- Enhanced test suite with horizontal rule filtering validation
+- Improved code documentation for markdown processing methods
+
 ## [1.1.0] - 2025-08-15
 
 ### 🎨 Enhanced Styling & Clean Design
