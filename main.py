@@ -302,8 +302,14 @@ class ResumeBuilder:
             elif entry_type == 'bullet':
                 formatted.append(Paragraph(f"• {clean_content}", self.styles['Body']))
             elif entry_type == 'content':
-                if clean_content.startswith('**') and clean_content.endswith('**'):
-                    # Job title
+                # Check for project titles with links: **[Title](link)**
+                if (clean_content.startswith('**') and clean_content.endswith('**') and 
+                    '<link href=' in clean_content):
+                    # Project title with link
+                    title = clean_content[2:-2]  # Remove ** wrapper
+                    formatted.append(Paragraph(title, self.styles['JobTitle']))
+                elif clean_content.startswith('**') and clean_content.endswith('**'):
+                    # Regular job/project title
                     title = clean_content[2:-2]
                     formatted.append(Paragraph(title, self.styles['JobTitle']))
                 else:

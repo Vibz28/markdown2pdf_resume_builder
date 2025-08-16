@@ -121,15 +121,22 @@ Date Range | Location
 
 ## PROJECTS
 
-**Project Name — Technology Stack**  
+**[Project Name — Technology Stack](https://link-to-project.com)**  
 - Description of the project and achievements
+- Technical accomplishments with specific technologies
+
+**Another Project — Technology Stack**  
+- Description without link (also supported)
 ```
 
 ### Supported Markdown Features
 
 - **Headers** (H1-H4): Used for name, sections, companies, and positions
 - **Bold/Italic**: For emphasis and highlighting
-- **Links**: Email, LinkedIn, GitHub, portfolio links (preserved as clickable)
+- **Links**: Email, LinkedIn, GitHub, portfolio, and project links (preserved as clickable)
+  - Contact links: `[email@domain.com](mailto:email@domain.com)`
+  - Social links: `[LinkedIn Profile](https://linkedin.com/in/username)`
+  - Project links: `**[Project Title](https://link-to-project.com)**`
 - **Lists**: Bullet points for achievements and skills
 - **Code**: Inline code for technical terms and technologies
 - **Tables**: For structured data (if needed)
