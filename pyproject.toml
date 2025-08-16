@@ -1,0 +1,72 @@
+[project]
+name = "markdown2pdf-resume-builder"
+version = "0.1.0"
+description = "A professional resume builder that converts Markdown to beautifully formatted PDFs with dynamic sizing and ATS-friendly formatting"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+    { name = "Vibhor Janey", email = "vibhor.janey@gmail.com" }
+]
+license = { text = "Apache-2.0" }
+keywords = ["resume", "pdf", "markdown", "cv", "ats-friendly"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Office/Business",
+    "Topic :: Text Processing :: Markup",
+    "Topic :: Utilities",
+]
+dependencies = [
+    "markdown2>=2.5.0",
+    "reportlab>=4.0.0",
+    "weasyprint>=66.0",
+    "click>=8.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "black>=22.0.0",
+    "flake8>=5.0.0",
+    "mypy>=1.0.0",
+]
+
+[project.scripts]
+markdown2pdf-resume-builder = "main:main"
+resume-builder = "main:main"
+
+[project.urls]
+Homepage = "https://github.com/Vibz28/markdown2pdf_resume_builder"
+Documentation = "https://github.com/Vibz28/markdown2pdf_resume_builder#readme"
+Repository = "https://github.com/Vibz28/markdown2pdf_resume_builder"
+Issues = "https://github.com/Vibz28/markdown2pdf_resume_builder/issues"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.black]
+line-length = 100
+target-version = ['py310']
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = truet]
+name = "markdown2pdf-resume-builder"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "click>=8.2.1",
+    "markdown2>=2.5.4",
+    "reportlab>=4.4.3",
+    "weasyprint>=66.0",
+]
