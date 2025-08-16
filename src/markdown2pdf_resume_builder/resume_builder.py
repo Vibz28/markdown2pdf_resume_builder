@@ -20,7 +20,7 @@ class ResumeBuilder:
     """Main class for building PDF resumes from Markdown files using ReportLab."""
     
     def __init__(self, one_page: bool = False, output_dir: str = "output", 
-                 header_color: str = "#4A6741", font_scheme: str = "modern"):
+                 header_color: str = "white", font_scheme: str = "modern"):
         self.one_page = one_page
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(exist_ok=True)
@@ -28,7 +28,14 @@ class ResumeBuilder:
         self.styles = None  # Will be created after content analysis
         
         # Template styling options
-        self.header_color = Color(*[int(header_color.lstrip('#')[i:i+2], 16)/255.0 for i in (0, 2, 4)])
+        self.header_color_hex = header_color
+        self.is_white_background = header_color.lower() == "white" or header_color == "#ffffff"
+        if self.is_white_background:
+            self.header_color = white
+            self.header_text_color = black
+        else:
+            self.header_color = Color(*[int(header_color.lstrip('#')[i:i+2], 16)/255.0 for i in (0, 2, 4)])
+            self.header_text_color = white
         self.font_scheme = font_scheme
     
     def _estimate_content_length(self, content: str) -> int:
@@ -68,101 +75,122 @@ class ResumeBuilder:
             'small_size': 7.5 * scale
         }
     
-    def _create_styles(self, content_length: int) -> Dict[str, ParagraphStyle]:
-        """Create custom paragraph styles for the resume."""
-        styles = getSampleStyleSheet()
+    def create_styles(self):
+        """Create paragraph styles based on content length."""
+        base_styles = getSampleStyleSheet()
         
-        # Get dynamic sizing based on content length
-        sizing = self._get_dynamic_sizing(content_length)
-        base_size = sizing['base_size']
-        name_size = sizing['name_size']
-        section_size = sizing['section_size']
-        small_size = sizing['small_size']
+        if self.content_length > 5000:
+            font_size = 9
+            title_size = 14
+            name_size = 18
+            spacing = 3
+        elif self.content_length > 3000:
+            font_size = 10
+            title_size = 16
+            name_size = 20
+            spacing = 4
+        else:
+            font_size = 11
+            title_size = 18
+            name_size = 22
+            spacing = 6
+
+        font_family = "Helvetica"
+        if self.font_scheme == "serif":
+            font_family = "Times-Roman"
+        elif self.font_scheme == "sans":
+            font_family = "Helvetica"
         
-        custom_styles = {
+        self.styles = {
             'Name': ParagraphStyle(
                 'Name',
-                parent=styles['Heading1'],
+                parent=base_styles['Heading1'],
                 fontSize=name_size,
-                spaceAfter=2 if self.one_page else 6,
-                alignment=TA_CENTER,
-                textColor=white,
-                fontName='Helvetica-Bold'
+                fontName=f'{font_family}-Bold',
+                textColor=self.header_text_color,
+                alignment=1,  # Center
+                spaceAfter=2,
+                spaceBefore=0,
             ),
             'Title': ParagraphStyle(
                 'Title',
-                parent=styles['Normal'],
-                fontSize=base_size,
-                spaceAfter=2 if self.one_page else 6,
-                alignment=TA_CENTER,
-                textColor=white,
-                fontName='Helvetica-Oblique'
+                parent=base_styles['Normal'],
+                fontSize=title_size-2,
+                fontName=font_family,
+                textColor=self.header_text_color,
+                alignment=1,  # Center
+                spaceAfter=spacing,
+                spaceBefore=0,
             ),
             'Contact': ParagraphStyle(
                 'Contact',
-                parent=styles['Normal'],
-                fontSize=small_size,
-                spaceAfter=4 if self.one_page else 12,
-                alignment=TA_CENTER,
-                textColor=white
+                parent=base_styles['Normal'],
+                fontSize=font_size-1,
+                fontName=font_family,
+                textColor=self.header_text_color,
+                alignment=1,  # Center
+                spaceAfter=2,
+                spaceBefore=0,
             ),
             'SectionHeader': ParagraphStyle(
                 'SectionHeader',
-                parent=styles['Heading2'],
-                fontSize=section_size,
-                spaceAfter=2 if self.one_page else 6,
-                spaceBefore=4 if self.one_page else 12,
-                textColor=Color(0.1, 0.15, 0.2),
-                fontName='Helvetica-Bold',
-                borderWidth=1,
-                borderColor=Color(0.7, 0.7, 0.7),
-                backColor=Color(0.95, 0.95, 0.95)
+                parent=base_styles['Heading2'],
+                fontSize=font_size+3,
+                fontName=f'{font_family}-Bold',
+                textColor=black,
+                spaceAfter=spacing,
+                spaceBefore=spacing,
+                underline=1,
+                underlineWidth=1,
+                leftIndent=0,
             ),
             'JobTitle': ParagraphStyle(
                 'JobTitle',
-                parent=styles['Normal'],
-                fontSize=base_size - 0.5,
-                spaceAfter=1 if self.one_page else 2,
+                parent=base_styles['Normal'],
+                fontSize=font_size+1,
+                fontName=f'{font_family}-Oblique',  # Italicized
                 textColor=black,
-                fontName='Helvetica-Bold'
+                spaceAfter=1,
+                spaceBefore=spacing-2,
             ),
             'Company': ParagraphStyle(
                 'Company',
-                parent=styles['Normal'],
-                fontSize=base_size,
-                spaceAfter=1 if self.one_page else 2,
+                parent=base_styles['Normal'],
+                fontSize=font_size,
+                fontName=f'{font_family}-Bold',
                 textColor=black,
-                fontName='Helvetica-Bold'
+                spaceAfter=1,
+                spaceBefore=0,
             ),
             'DateLocation': ParagraphStyle(
                 'DateLocation',
-                parent=styles['Normal'],
-                fontSize=small_size,
-                spaceAfter=2 if self.one_page else 6,
-                textColor=Color(0.4, 0.4, 0.4),
-                fontName='Helvetica-Oblique'
+                parent=base_styles['Normal'],
+                fontSize=font_size-1,
+                fontName=f'{font_family}-Oblique',
+                textColor=black,
+                spaceAfter=spacing-2,
+                spaceBefore=0,
             ),
             'Body': ParagraphStyle(
                 'Body',
-                parent=styles['Normal'],
-                fontSize=base_size - 0.5,
-                spaceAfter=1.5 if self.one_page else 4,
-                alignment=TA_JUSTIFY,
-                leftIndent=10 if self.one_page else 12,
-                bulletIndent=10 if self.one_page else 12,
-                leading=(base_size - 0.5) * 1.2
+                parent=base_styles['Normal'],
+                fontSize=font_size,
+                fontName=font_family,
+                textColor=black,
+                spaceAfter=2,
+                spaceBefore=0,
+                leftIndent=12,
             ),
             'Skills': ParagraphStyle(
                 'Skills',
-                parent=styles['Normal'],
-                fontSize=base_size - 0.5,
-                spaceAfter=2 if self.one_page else 6,
-                alignment=TA_JUSTIFY,
-                leading=(base_size - 0.5) * 1.2
-            )
+                parent=base_styles['Normal'],
+                fontSize=font_size,
+                fontName=font_family,
+                textColor=black,
+                spaceAfter=2,
+                spaceBefore=0,
+            ),
         }
-        
-        return custom_styles
     
     def _parse_markdown_content(self, content: str) -> List[Dict]:
         """Parse markdown content into structured data."""
@@ -265,7 +293,7 @@ class ResumeBuilder:
         return reordered
     
     def _create_header_table(self, name: str, title: str, contact_lines: List[str]) -> Table:
-        """Create the header table with colored background matching template."""
+        """Create the header table with clean styling."""
         # Process contact information into table cells
         contact_data = []
         for line in contact_lines:
@@ -281,16 +309,29 @@ class ResumeBuilder:
         # Add contact rows
         header_data.extend(contact_data)
         
-        # Create table
-        table = Table(header_data, colWidths=[7.5*inch])
-        table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, -1), self.header_color),
-            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-            ('LEFTPADDING', (0, 0), (-1, -1), 12),
-            ('RIGHTPADDING', (0, 0), (-1, -1), 12),
-            ('TOPPADDING', (0, 0), (-1, -1), 8),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
-        ]))
+        # Create table with appropriate width (not full margin width)
+        table = Table(header_data, colWidths=[6.5*inch])
+        
+        # Apply styling based on background color choice
+        if self.is_white_background:
+            table.setStyle(TableStyle([
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('LEFTPADDING', (0, 0), (-1, -1), 12),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 12),
+                ('TOPPADDING', (0, 0), (-1, -1), 6),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+            ]))
+        else:
+            table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, -1), self.header_color),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('LEFTPADDING', (0, 0), (-1, -1), 12),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 12),
+                ('TOPPADDING', (0, 0), (-1, -1), 8),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+            ]))
         
         return table
     
@@ -324,13 +365,8 @@ class ResumeBuilder:
                 story.append(Spacer(1, 6 if self.one_page else 15))
             
             elif section['type'] == 'section':
-                # Section header with icon and styling
-                section_title = f"🎓 {section['title']}" if 'education' in section['title'].lower() else \
-                               f"💼 {section['title']}" if 'experience' in section['title'].lower() or 'work' in section['title'].lower() else \
-                               f"🛠 {section['title']}" if 'skill' in section['title'].lower() else \
-                               f"📂 {section['title']}" if 'project' in section['title'].lower() else \
-                               f"📚 {section['title']}" if 'course' in section['title'].lower() else \
-                               section['title']
+                # Clean section header without icons or boxes
+                section_title = section['title']
                 
                 story.append(Paragraph(section_title, self.styles['SectionHeader']))
                 
@@ -415,7 +451,7 @@ class ResumeBuilder:
         self.content_length = self._estimate_content_length(markdown_content)
         
         # Create styles based on content analysis
-        self.styles = self._create_styles(self.content_length)
+        self.create_styles()
         
         # Parse content
         sections = self._parse_markdown_content(markdown_content)

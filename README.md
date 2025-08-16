@@ -45,10 +45,10 @@ pip install reportlab markdown2 click
 
 ### Basic Usage
 ```bash
-# Generate one-page resume with template styling
+# Clean white header (default)
 python main.py resume.md --one-page
 
-# Generate multi-page resume with custom header color
+# Colored header for branding
 python main.py resume.md --header-color="#2C5F41"
 
 # Open PDF automatically after generation
@@ -60,7 +60,7 @@ python main.py resume.md --one-page --open-pdf
 # Full customization
 python main.py resume.md \
     --one-page \
-    --header-color="#4A6741" \
+    --header-color="white" \
     --font-scheme="modern" \
     --output-dir="pdfs" \
     --output="my_resume" \
@@ -136,7 +136,7 @@ Month Year
 | Option | Description | Default |
 |--------|-------------|---------|
 | `--one-page` | Compress to single page | Multi-page |
-| `--header-color` | Header background color | `#4A6741` |
+| `--header-color` | Header background color | `white` |
 | `--font-scheme` | Font styling scheme | `modern` |
 | `--output-dir` | Output directory | `output` |
 | `--output` | Custom filename | Auto-generated |

@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2025-08-15
+
+### 🎨 Enhanced Styling & Clean Design
+
+### Changed
+- **Clean Default Styling**
+  - Changed default header background to white for professional appearance
+  - Removed section icons (🎓, 💼, 🛠, etc.) for cleaner look
+  - Eliminated horizontal separators between sections
+  - Removed section title bounding boxes and background colors
+
+### Improved
+- **Header Design**
+  - Header no longer expands to full margin width
+  - Better spacing and padding for professional look
+  - Maintains colored header option for branding when desired
+
+- **Section Headers**
+  - Clean underlined design instead of boxed styling
+  - Bold text with slightly increased font size
+  - Proper spacing for visual hierarchy
+
+- **Typography**
+  - Job titles now italicized for better differentiation
+  - Consistent font styling throughout document
+  - Improved visual hierarchy with clean typography
+
+### Technical
+- Enhanced template styling system to support both white and colored backgrounds
+- Improved header table width calculation and centering
+- Refined paragraph style definitions for better visual appeal
+
 ## [1.0.0] - 2025-08-15
 
 ### 🎉 Major Release - Complete Restructure & Enhanced Features

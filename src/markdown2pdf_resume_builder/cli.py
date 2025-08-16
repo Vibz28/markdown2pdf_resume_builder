@@ -15,7 +15,7 @@ from .resume_builder import ResumeBuilder, open_pdf
 @click.option('--output', '-o', help='Output filename (without extension)')
 @click.option('--output-dir', default='output', help='Output directory (default: output)')
 @click.option('--open-pdf', 'open_pdf_flag', is_flag=True, help='Open the generated PDF after creation')
-@click.option('--header-color', default='#4A6741', help='Header background color (default: #4A6741)')
+@click.option('--header-color', default='white', help='Header background color (default: white)')
 @click.option('--font-scheme', default='modern', help='Font scheme (default: modern)')
 def main(markdown_file: str, one_page: bool, output: Optional[str], output_dir: str, 
          open_pdf_flag: bool, header_color: str, font_scheme: str):
