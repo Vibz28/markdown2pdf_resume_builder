@@ -13,6 +13,9 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.lib.colors import Color, black, blue, white
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, KeepTogether, Table, TableStyle
+from reportlab.platypus.flowables import HRFlowable
+
+from .themes import get_theme
 from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_JUSTIFY
 
 
@@ -20,19 +23,21 @@ class ResumeBuilder:
     """Main class for building PDF resumes from Markdown files using ReportLab."""
     
     def __init__(self, one_page: bool = False, output_dir: str = "output", 
-                 header_color: str = "white", font_scheme: str = "modern"):
+                 header_color: str = "white", font_scheme: str = "modern", theme: str = "light"):
         self.one_page = one_page
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(exist_ok=True)
         self.content_length = 0
         self.styles = None  # Will be created after content analysis
+        self.theme = get_theme(theme)
         
         # Template styling options
         self.header_color_hex = header_color
         self.is_white_background = header_color.lower() == "white" or header_color == "#ffffff"
         if self.is_white_background:
-            self.header_color = white
-            self.header_text_color = black
+            # Use theme background for header in white mode
+            self.header_color = self.theme.get_color('card')
+            self.header_text_color = self.theme.get_color('fg')
         else:
             self.header_color = Color(*[int(header_color.lstrip('#')[i:i+2], 16)/255.0 for i in (0, 2, 4)])
             self.header_text_color = white
@@ -119,29 +124,30 @@ class ResumeBuilder:
                 name_size = 22
                 spacing = 6
 
-        font_family = "Helvetica"
+        # Theme-based font selection (matching HTML template)
+        font_family = self.theme.fonts['primary']
         if self.font_scheme == "serif":
             font_family = "Times-Roman"
         elif self.font_scheme == "sans":
-            font_family = "Helvetica"
+            font_family = "Helvetica"  # Clean, modern font like Inter
         
         self.styles = {
             'Name': ParagraphStyle(
                 'Name',
                 parent=base_styles['Heading1'],
-                fontSize=name_size,
+                fontSize=name_size+1,
                 fontName=f'{font_family}-Bold',
                 textColor=self.header_text_color,
                 alignment=1,  # Center
-                spaceAfter=1,  # Reduced header spacing
+                spaceAfter=0,  # Reduced header spacing
                 spaceBefore=0,
             ),
             'Title': ParagraphStyle(
                 'Title',
                 parent=base_styles['Normal'],
-                fontSize=title_size-1,  # Slightly smaller
-                fontName=f'{font_family}-Bold',
-                textColor=self.header_text_color,
+                fontSize=title_size+1,  # Slightly larger
+                fontName=font_family,
+                textColor=self.theme.get_color('muted'),  # Muted color like HTML
                 alignment=1,  # Center
                 spaceAfter=2 if self.one_page else spacing,  # Reduced header spacing
                 spaceBefore=0,
@@ -149,9 +155,9 @@ class ResumeBuilder:
             'Contact': ParagraphStyle(
                 'Contact',
                 parent=base_styles['Normal'],
-                fontSize=font_size-1,
+                fontSize=font_size+2,
                 fontName=font_family,
-                textColor=self.header_text_color,
+                textColor=self.theme.get_color('fg'),
                 alignment=1,  # Center
                 spaceAfter=1 if self.one_page else 2,  # Reduced header spacing
                 spaceBefore=0,
@@ -159,21 +165,19 @@ class ResumeBuilder:
             'SectionHeader': ParagraphStyle(
                 'SectionHeader',
                 parent=base_styles['Heading2'],
-                fontSize=font_size+2,  # Slightly larger than body
+                fontSize=font_size-1,  # Smaller, uppercase-style headers
                 fontName=f'{font_family}-Bold',
-                textColor=black,
+                textColor=self.theme.get_color('muted'),  # Muted like HTML
                 spaceAfter=spacing,
                 spaceBefore=spacing,
-                underline=1,
-                underlineWidth=1,
                 leftIndent=0,
             ),
             'JobTitle': ParagraphStyle(
                 'JobTitle',
                 parent=base_styles['Normal'],
-                fontSize=font_size-1,  # Smaller than company name
-                fontName=f'{font_family}-Oblique',  # Italicized
-                textColor=black,
+                fontSize=font_size,  # Same as company for balance
+                fontName=f'{font_family}-Bold',
+                textColor=self.theme.get_color('fg'),
                 spaceAfter=1,
                 spaceBefore=spacing-2 if spacing > 2 else 0,
             ),
@@ -182,7 +186,7 @@ class ResumeBuilder:
                 parent=base_styles['Normal'],
                 fontSize=font_size,  # Base size for company
                 fontName=f'{font_family}-Bold',
-                textColor=black,
+                textColor=self.theme.get_color('fg'),
                 spaceAfter=1,
                 spaceBefore=0,
             ),
@@ -190,8 +194,8 @@ class ResumeBuilder:
                 'DateLocation',
                 parent=base_styles['Normal'],
                 fontSize=font_size-1.5,  # Smaller for dates
-                fontName=f'{font_family}-Oblique',
-                textColor=black,
+                fontName=font_family,
+                textColor=self.theme.get_color('muted'),  # Muted color
                 spaceAfter=spacing-2 if spacing > 2 else 1,
                 spaceBefore=0,
             ),
@@ -200,7 +204,7 @@ class ResumeBuilder:
                 parent=base_styles['Normal'],
                 fontSize=font_size,
                 fontName=font_family,
-                textColor=black,
+                textColor=self.theme.get_color('fg'),
                 spaceAfter=1 if self.one_page else 2,
                 spaceBefore=0,
                 leftIndent=12,
@@ -208,9 +212,9 @@ class ResumeBuilder:
             'Skills': ParagraphStyle(
                 'Skills',
                 parent=base_styles['Normal'],
-                fontSize=font_size,
+                fontSize=font_size-0.5,  # Slightly smaller for skills
                 fontName=font_family,
-                textColor=black,
+                textColor=self.theme.get_color('fg'),
                 spaceAfter=1 if self.one_page else 2,
                 spaceBefore=0,
             ),
@@ -270,7 +274,9 @@ class ResumeBuilder:
     def _clean_text(self, text: str) -> str:
         """Clean markdown formatting for ReportLab."""
         # Handle links first to avoid interference - make them visually distinct
-        text = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r'<link href="\2" color="blue"><u>\1</u></link>', text)
+        # Use theme-aware link color
+        link_color = "cyan" if self.theme.name == "dark" else "blue"
+        text = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', rf'<link href="\2" color="{link_color}"><u>\1</u></link>', text)
         
         # Handle bold+italic combination first: _**text**_ or **_text_**
         text = re.sub(r'_\*\*([^*]+)\*\*_', r'<b><i>\1</i></b>', text)  # _**text**_ -> bold+italic
@@ -285,7 +291,7 @@ class ResumeBuilder:
         return text
     
     def _reorder_sections(self, sections: List[Dict]) -> List[Dict]:
-        """Reorder sections to: Education, Experience, Skills, Projects, Courses."""
+        """Reorder sections to: Experience, Education, Skills, Projects, Courses."""
         name_section = None
         section_map = {}
         other_sections = []
@@ -315,7 +321,7 @@ class ResumeBuilder:
             reordered.append(name_section)
         
         # Add sections in desired order
-        for section_key in ['education', 'experience', 'skills', 'projects', 'courses']:
+        for section_key in ['experience', 'education', 'projects', 'skills', 'courses']:
             if section_key in section_map:
                 reordered.append(section_map[section_key])
         
@@ -398,45 +404,168 @@ class ResumeBuilder:
             
             elif section['type'] == 'section':
                 # Clean section header without icons or boxes
-                section_title = section['title']
+                section_title = section['title'].upper()  # Uppercase for professional look
                 
                 story.append(Paragraph(section_title, self.styles['SectionHeader']))
                 
-                # Process section content
-                current_entry = []
-                
-                for line in section['content']:
-                    if line.startswith('**') and not line.startswith('***') and line.endswith('**'):
-                        # Company or institution name
-                        if current_entry:
-                            story.extend(self._format_entry(current_entry))
-                            current_entry = []
+                # Special handling for skills section to use chip-like formatting
+                if 'skill' in section['title'].lower():
+                    story.extend(self._format_skills_section(section['content']))
+                elif 'education' in section['title'].lower():
+                    # Special handling for education section - horizontal layout
+                    story.extend(self._format_education_section(section['content']))
+                else:
+                    # Process section content normally
+                    current_entry = []
+                    
+                    for line in section['content']:
+                        if line.startswith('**') and not line.startswith('***') and line.endswith('**'):
+                            # Company or institution name
+                            if current_entry:
+                                story.extend(self._format_entry(current_entry))
+                                current_entry = []
+                            
+                            company = line.strip('*')
+                            current_entry.append(('company', company))
                         
-                        company = line.strip('*')
-                        current_entry.append(('company', company))
+                        elif line.startswith('*') and '|' in line and line.endswith('*'):
+                            # Date and location
+                            date_loc = line.strip('*').strip()
+                            current_entry.append(('date_location', date_loc))
+                        
+                        elif line.startswith('- '):
+                            # Bullet point
+                            bullet = line[2:]
+                            current_entry.append(('bullet', bullet))
+                        
+                        elif line and not line.startswith('#'):
+                            # Regular content
+                            current_entry.append(('content', line))
                     
-                    elif line.startswith('*') and '|' in line and line.endswith('*'):
-                        # Date and location
-                        date_loc = line.strip('*').strip()
-                        current_entry.append(('date_location', date_loc))
-                    
-                    elif line.startswith('- '):
-                        # Bullet point
-                        bullet = line[2:]
-                        current_entry.append(('bullet', bullet))
-                    
-                    elif line and not line.startswith('#'):
-                        # Regular content
-                        current_entry.append(('content', line))
-                
-                # Add the last entry
-                if current_entry:
-                    story.extend(self._format_entry(current_entry))
+                    # Add the last entry
+                    if current_entry:
+                        story.extend(self._format_entry(current_entry))
                 
                 story.append(Spacer(1, 2 if self.one_page else 10))
         
         return story
     
+    def _format_skills_section(self, content: List[str]) -> List:
+        """Format skills section with chip-like styling."""
+        formatted = []
+        current_category = None
+        
+        for line in content:
+            clean_line = self._clean_text(line)
+            if clean_line.startswith('**') and clean_line.endswith('**'):
+                # Category header
+                category = clean_line[2:-2]  # Remove ** markers
+                if current_category:
+                    formatted.append(Spacer(1, 4))  # Space between categories
+                
+                # Create category header with muted styling
+                cat_style = ParagraphStyle(
+                    'SkillCategory',
+                    parent=self.styles['Skills'],
+                    fontSize=self.styles['Skills'].fontSize - 1,
+                    fontName=f"{self.theme.fonts['primary']}-Bold",
+                    textColor=self.theme.get_color('muted'),
+                    spaceAfter=2,
+                    spaceBefore=0,
+                )
+                formatted.append(Paragraph(category, cat_style))
+                current_category = category
+            else:
+                # Skills list - keep original comma formatting from markdown
+                formatted.append(Paragraph(clean_line, self.styles['Skills']))
+                
+        return formatted
+    
+    def _format_education_section(self, content: List[str]) -> List:
+        """Format education section with horizontal layout for institutions."""
+        formatted = []
+        education_entries = []
+        current_entry = []
+        
+        # Parse education entries
+        for line in content:
+            clean_line = self._clean_text(line)
+            if clean_line.startswith('**') and clean_line.endswith('**'):
+                # Institution name with degree - this is a new entry
+                if current_entry:
+                    education_entries.append(current_entry)
+                    current_entry = []
+                current_entry.append(('institution_degree', clean_line))
+            elif clean_line and not clean_line.startswith('#') and not clean_line.startswith('**'):
+                # Date and location info
+                current_entry.append(('date_location', clean_line))
+        
+        # Add the last entry
+        if current_entry:
+            education_entries.append(current_entry)
+        
+        # Create side-by-side layout for education entries
+        if education_entries and len(education_entries) >= 2:
+            # Extract data for both entries
+            left_institution_degree = ""
+            left_date_location = ""
+            right_institution_degree = ""
+            right_date_location = ""
+            
+            # Process left entry (first education item)
+            for entry_type, content_item in education_entries[0]:
+                if entry_type == 'institution_degree':
+                    left_institution_degree = str(content_item)
+                elif entry_type == 'date_location':
+                    left_date_location = str(content_item)
+            
+            # Process right entry (second education item)
+            for entry_type, content_item in education_entries[1]:
+                if entry_type == 'institution_degree':
+                    right_institution_degree = str(content_item)
+                elif entry_type == 'date_location':
+                    right_date_location = str(content_item)
+            
+            # Create table data with institution/degree row and date/location row
+            table_data = [
+                [
+                    Paragraph(left_institution_degree, self.styles['Company']),
+                    Paragraph(right_institution_degree, self.styles['Company'])
+                ],
+                [
+                    Paragraph(left_date_location, self.styles['DateLocation']),
+                    Paragraph(right_date_location, self.styles['DateLocation'])
+                ]
+            ]
+            
+            # Create table with equal column widths for side-by-side display
+            from reportlab.lib.units import inch
+            
+            education_table = Table(table_data, colWidths=[3.2*inch, 3.2*inch])
+            education_table.setStyle(TableStyle([
+                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                ('ALIGN', (0, 0), (-1, -1), 'LEFT'),  # Left align all content
+                ('LEFTPADDING', (0, 0), (-1, -1), 0),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+                ('TOPPADDING', (0, 0), (-1, -1), 0),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
+                ('ROWBACKGROUNDS', (0, 0), (-1, -1), [None, None])  # No backgrounds
+            ]))
+            
+            formatted.append(education_table)
+            
+        else:
+            # Fallback for single entry or more than two entries
+            for entry in education_entries:
+                for entry_type, content_item in entry:
+                    if entry_type == 'institution_degree':
+                        formatted.append(Paragraph(str(content_item), self.styles['Company']))
+                    elif entry_type == 'date_location':
+                        formatted.append(Paragraph(str(content_item), self.styles['DateLocation']))
+                formatted.append(Spacer(1, 4))
+        
+        return formatted
+                
     def _format_entry(self, entry: List[Tuple[str, str]]) -> List:
         """Format a single entry (job, education, etc.)."""
         formatted = []
@@ -496,7 +625,7 @@ class ResumeBuilder:
         
         output_path = self.output_dir / output_filename
         
-        # Set up PDF document with more aggressive margins for one-page
+        # Set up PDF document with theme-aware styling
         margins = 0.3*inch if self.one_page else 0.75*inch
         doc = SimpleDocTemplate(
             str(output_path),
@@ -507,11 +636,20 @@ class ResumeBuilder:
             rightMargin=margins
         )
         
-        # Build PDF content
+        # Build PDF content with theme support
         story = self._build_pdf_content(sections)
         
-        # Generate PDF
-        doc.build(story)
+        # Apply theme background if dark mode
+        def apply_theme_background(canvas, doc):
+            if self.theme.name == 'dark':
+                canvas.setFillColor(self.theme.get_color('bg'))
+                canvas.rect(0, 0, doc.pagesize[0], doc.pagesize[1], fill=1, stroke=0)
+        
+        # Generate PDF with theme support
+        if self.theme.name == 'dark':
+            doc.build(story, onFirstPage=apply_theme_background, onLaterPages=apply_theme_background)
+        else:
+            doc.build(story)
         
         return str(output_path)
 

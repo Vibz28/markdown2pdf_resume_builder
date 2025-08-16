@@ -17,8 +17,9 @@ from .resume_builder import ResumeBuilder, open_pdf
 @click.option('--open-pdf', 'open_pdf_flag', is_flag=True, help='Open the generated PDF after creation')
 @click.option('--header-color', default='white', help='Header background color (default: white)')
 @click.option('--font-scheme', default='modern', help='Font scheme (default: modern)')
+@click.option('--theme', default='light', type=click.Choice(['light', 'dark']), help='Theme mode (default: light)')
 def main(markdown_file: str, one_page: bool, output: Optional[str], output_dir: str, 
-         open_pdf_flag: bool, header_color: str, font_scheme: str):
+         open_pdf_flag: bool, header_color: str, font_scheme: str, theme: str):
     """
     Convert a Markdown resume to a professionally formatted PDF.
     
@@ -30,7 +31,8 @@ def main(markdown_file: str, one_page: bool, output: Optional[str], output_dir: 
             one_page=one_page, 
             output_dir=output_dir,
             header_color=header_color,
-            font_scheme=font_scheme
+            font_scheme=font_scheme,
+            theme=theme
         )
         
         # Generate PDF
