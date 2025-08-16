@@ -6,7 +6,7 @@ echo "=================================================="
 echo
 
 # Set the resume file
-RESUME_FILE="resume_vibhor_janey_updated_aug_2025.md"
+RESUME_FILE="[YOUR_RESUME_FILE].md"
 
 if [ ! -f "$RESUME_FILE" ]; then
     echo "❌ Resume file not found: $RESUME_FILE"
